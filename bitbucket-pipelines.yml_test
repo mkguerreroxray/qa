@@ -1,0 +1,55 @@
+options:
+  docker: true
+image:  maven:3.8.3-eclipse-temurin-11
+size: 2x
+pipelines:
+  default:
+    - step:
+        caches:
+          - node
+        name: Comp TEST
+        script:
+          - mvn clean
+          - mvn compile
+          - mvn test
+
+    # - step:
+    #     size: 2x
+    #     caches:
+    #       - node
+    #     name: Scan-Code
+    #     image:
+    #         name: sonarsource/sonar-scanner-cli:latest
+    #     script:
+    #       - sonar-scanner
+
+  branches:
+    develop:
+      - step:
+          size: 2x
+          name: MAKE TEST
+          caches:
+            - node
+          script:
+            - mvn clean
+            - mvn compile
+            - mvn test
+
+    # #despliegue en D2
+    #   - step:
+    #       name: Deploy D2
+    #       image:
+    #         name: cytopia/ansible:2.9-tools
+    #       deployment: Staging-Develop2D
+    #       #trigger: manual
+    #       script:
+    #         - chmod 0750 .devops/ansible
+    #         - DOCKER_TAG=$(cat package.json | grep version | head -1  | awk -F":" '{ print $2 }' | sed 's/[", ]//g')
+    #         - cd .devops/ansible
+    #         - pwd
+    #         - chmod 0600 keypairs/*
+    #         - chmod +x get_vault_password.py
+    #         - echo $DOCKER_TAG
+    #         - ansible-playbook playbooks/decrypt-private-key.yml
+    #         - ansible-playbook playbooks/deploy.yml --extra-vars "target=dev  docker_ver=$DOCKER_TAG"
+    #         - ansible-playbook playbooks/encrypt-private-key.yml

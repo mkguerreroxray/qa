@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+    environment {
+        dockerHome = tool 'myDocker'
+        mavenHome = tool 'myMaven'
+        nodejsHome = tool 'myNodejs'
+        ansibleHome = tool 'myAnsible'
+        jdk = tool 'myJDK'
+        xvfb = tool 'myXvfb'
+        allure = tool 'myAllure'
+        PATH = "$ansibleHome/bin:$dockerHome/bin:$mavenHome/bin:$nodejsHome/bin:$xvfb/bin:$jdk/bin:$allure/bin:$PATH"
+    }
+    stages {
+         // Defoult branch  
+        stage('QA TEST') {
+            agent {
+                docker {
+                    image 'moneytrans/selenium-chromdrive-qa:1.0'
+                    args '--user seluser'
+                }
+            }             
+            steps {
+                sh 'mvn clean'
+                sh 'mvn compile'
+                sh 'mvn -Dtest=BE_Web_Agent_Create_A_New_CustomerTest test'
+            }
+        }
+    }
+}
